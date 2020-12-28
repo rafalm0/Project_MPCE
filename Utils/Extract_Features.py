@@ -1,6 +1,4 @@
 import glob
-import os
-import numpy as np
 import face_recognition
 import cv2
 from imutils.face_utils import FaceAligner
