@@ -1,0 +1,7 @@
+{
+  "dataset_path" : "/opt/project/dataset/train",
+  "dataset_exit_encodings_path" : "/opt/project/dataset/encoded_faces",
+  "number_of_process" : 4,
+  "back_up_percentage" : 0.1,
+  "shape_predictor_path" : "/opt/project/Utils/pretrained_models/shape_predictor_68_face_landmarks.dat"
+}

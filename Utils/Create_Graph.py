@@ -62,9 +62,6 @@ def create_graph(graph_data, plot_graph: bool = False, source: str = "node_x", t
     return G
 
 
-
-
-
 def add_new_faces(G, faces_dataframe: pd.DataFrame, new_faces_dataframe, threshold: float = 0.5, normalize: bool = True,
                   print_key: bool = False):
     if type(new_faces_dataframe) == list:
@@ -82,15 +79,12 @@ def add_new_faces(G, faces_dataframe: pd.DataFrame, new_faces_dataframe, thresho
 
     return G, joined_data
 
-
-if __name__ == '__main__':
-    # with open("/opt/project/dataset/image_encondings.pickle", 'rb') as file:
-    #     data = pickle.load(file)
-
-    faces_data_graph = generate_conections(data[["encoding"]], 0.5, True)
-    G = create_graph(faces_data_graph, plot_graph=False)
-
-    # print(clustered_df)
-    # for i in G.nodes():
-    #     print(i, G.nodes()[i]["labels"])
-    # G.nodes()[i]["labels"] = results_df.loc[i]["labels"]
+# if __name__ == '__main__':
+# with open("/opt/project/dataset/image_encondings.pickle", 'rb') as file:
+#     data = pickle.load(file)
+# faces_data_graph = generate_conections(data[["encoding"]], 0.5, True)
+# G = create_graph(faces_data_graph, plot_graph=False)
+# print(clustered_df)
+# for i in G.nodes():
+#     print(i, G.nodes()[i]["labels"])
+# G.nodes()[i]["labels"] = results_df.loc[i]["labels"]

@@ -1,22 +1,38 @@
-import glob
 import face_recognition
 import cv2
 from imutils.face_utils import FaceAligner
 import dlib
 import pandas as pd
 import pickle
+import os
 
 
-def extract_face_features(images_train_path: str,
-                          trained_prediciton_path: str = "/opt/project/Utils/pretrained_models/shape_predictor_68_face_landmarks.dat",
+def path_creation_verification(path: str):
+    if os.path.exists(path):
+        return
+
+    path_splited = path.split("/") if "/" in path else path.split("\\")
+
+    full_path = ""
+    for directory in path_splited:
+        full_path = f"{full_path}/{directory}"
+        if not os.path.exists(full_path):
+            os.mkdir(full_path)
+
+
+def extract_face_features(images_path: list, images_exit_path: str, process_number: str,
+                          shape_predictor_path: str, back_up_percentage: float,
                           normalize: bool = True, print_key: bool = True, save_pickle: bool = True,
                           save_csv: bool = True,
-                          detection_method: str = "cnn",
-                          plot_faces: bool = False) -> pd.DataFrame:
-    predictor = dlib.shape_predictor(trained_prediciton_path)
+                          detection_method: str = "cnn"
+                          ) -> pd.DataFrame:
+    print(f"Process Number {process_number} was started")
+
+    predictor = dlib.shape_predictor(shape_predictor_path)
     fa = FaceAligner(predictor, desiredFaceWidth=256)
 
-    images_path = glob.glob(f"{images_train_path}/*")
+    to_back_up_qtd = int(len(images_path) + 1)
+
     data = {"imagePath": [], "face_locations": [], "encoding": []}
     for (i, imagePath) in enumerate(images_path):
         if print_key:
@@ -53,26 +69,41 @@ def extract_face_features(images_train_path: str,
             data["face_locations"].append(box)
             data["encoding"].append(enc)
 
+        if back_up_percentage > 0 and i % to_back_up_qtd == 0:
+
+            if save_csv:
+                aux_df = pd.DataFrame(data)
+                aux_df.to_csv(f"{images_exit_path}/image_encondings_{process_number}.csv")
+                del aux_df
+            if save_pickle:
+                save_pickle_at(data, images_exit_path, process_number)
+
     data = pd.DataFrame(data)
     data.index += 1
-    exit_path ="/".join(images_train_path.split("/")[:-1])
+
+    while not os.path.exists(images_exit_path):
+        path_creation_verification(images_exit_path)
+
     if save_csv:
-        data.to_csv(f"{exit_path}/image_encondings.csv")
+        data.to_csv(f"{images_exit_path}/image_encondings_{process_number}.csv")
     if save_pickle:
-        save_pickle_at(data, exit_path)
+        save_pickle_at(data, images_exit_path, process_number)
+
+    print(f"Process Number {process_number} has ended")
 
     return data
 
 
-def save_pickle_at(data, path):
-    f = open(f"{path}/image_encondings.pickle", "wb")
+def save_pickle_at(data, path, process_number):
+    f = open(f"{path}/image_encondings_{process_number}.pickle", "wb")
     f.write(pickle.dumps(data))
     f.close()
 
 
 if __name__ == '__main__':
     # print(os.path.abspath(__file__))
-    path = "/opt/project/dataset/train"
+    path = "/opt/project/dataset/train/bala"
+    path_creation_verification(path)
     # print(os.listdir(path))
-    df = extract_face_features(path)
-    print(df)
+    # df = extract_face_features(path)
+    # print(df)
