@@ -81,8 +81,8 @@ def add_new_faces(G, faces_dataframe: pd.DataFrame, new_faces_dataframe, thresho
 
 # if __name__ == '__main__':
 # with open("/opt/project/dataset/image_encondings.pickle", 'rb') as file:
-#     data = pickle.load(file)
-# faces_data_graph = generate_conections(data[["encoding"]], 0.5, True)
+#     dataset = pickle.load(file)
+# faces_data_graph = generate_conections(dataset[["encoding"]], 0.5, True)
 # G = create_graph(faces_data_graph, plot_graph=False)
 # print(clustered_df)
 # for i in G.nodes():
