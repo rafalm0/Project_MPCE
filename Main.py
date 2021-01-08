@@ -11,7 +11,7 @@ import time
 
 
 
-configs_path = "/opt/project/user/configs/Configs.json"
+configs_path = "user/configs/Configs.json"
 
 with open(configs_path, 'r') as j:
     json_data = json.load(j)
