@@ -59,6 +59,6 @@ exit_var = time.time()
 
 print(f"cluster: {exit_var - initial_time}")
 
-clustered_df.to_csv(f"user/data/exit_data/result.csv")
+clustered_df.to_csv(f"{'/'.join(files_exit_path.sep('/')[:-1])}/result.csv")
 # for i in G.nodes():
 #     print(i, G.nodes()[i]["labels"])
