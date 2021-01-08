@@ -38,35 +38,26 @@ result_df.reset_index(drop=True, inplace=True)
 result_df.index += 1
 
 exit_var = time.time()
-print(exit_var - initial_time)
+print(f"extravtion: {exit_var - initial_time}")
 
 initial_time = time.time()
 
-# while images_path:
-#     threads_list = []
-#
-#     initial_lists = np.array_split(images_path[:process_qtd * percentage_qtd], process_qtd)
-#     files = files[process_qtd * percentage_qtd:]
-#     a = 0
-#     for i in range(process_qtd):
-#         t = multiprocessing.Process(target=ef.extract_face_features,
-#                                     args=(images_path, files_path, 't' + str(i + last_process)))
-#         t.start()
-#         threads_list.append(t)
-#         a = last_process + i
-#     last_process = a
-#
-#     del initial_lists
-#
-#     for t in threads_list:
-#         t.join()
 
-# df = ef.extract_face_features(images_path, files_path, "t0")
 faces_data_graph = cg.generate_conections(result_df[["encoding"]], 0.5, True)
+exit_var = time.time()
+print(f"cobection: {exit_var - initial_time}")
+
+initial_time = time.time()
 
 G = cg.create_graph(faces_data_graph, plot_graph=False)
+exit_var = time.time()
+print(f"Graph: {exit_var - initial_time}")
+initial_time = time.time()
 
 G, clustered_df = cm.cluster_cw(G, cg.get_graph_edges_value(G))
+exit_var = time.time()
+
+print(f"cluster: {exit_var - initial_time}")
 
 clustered_df.to_csv(f"user/data/exit_data/result.csv")
 # for i in G.nodes():
