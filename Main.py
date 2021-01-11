@@ -38,14 +38,14 @@ result_df.reset_index(drop=True, inplace=True)
 result_df.index += 1
 
 exit_var = time.time()
-print(f"extravtion: {exit_var - initial_time}")
+print(f"extraction: {exit_var - initial_time}")
 
 initial_time = time.time()
 
 
 faces_data_graph = cg.generate_conections(result_df[["encoding"]], 0.5, True)
 exit_var = time.time()
-print(f"cobection: {exit_var - initial_time}")
+print(f"conection: {exit_var - initial_time}")
 
 initial_time = time.time()
 
@@ -59,6 +59,7 @@ exit_var = time.time()
 
 print(f"cluster: {exit_var - initial_time}")
 
+result_df.index.name = "id"
 result_df["labels"] = clustered_df["labels"]
 result_df.to_csv(f"{'/'.join(files_exit_path.split('/')[:-1])}/result.csv")
 
