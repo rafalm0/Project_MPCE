@@ -5,6 +5,80 @@ import dlib
 import pandas as pd
 import pickle
 import os
+import numpy as np
+
+
+def save_result_json(df: pd.DataFrame, result_json: dict):
+    clusters = np.sort(df["cluster"].unique())
+
+    graph_df = df.drop(columns=["face_locations", "encoding"])
+    graph_df = graph_df.merge(graph_df, on="imagePath")
+    graph_df[["cluster_x", "cluster_y"]] = graph_df[["cluster_x", "cluster_y"]].apply(pd.to_numeric)
+
+    graph_df = graph_df.query("cluster_x < cluster_y")
+
+    graph_df.drop_duplicates(inplace=True)
+
+    occurrences = graph_df.groupby(by="cluster_x").apply(lambda a: (a["cluster_y"].tolist()))
+    graph_df = graph_df.sort_values(by=['cluster_x', 'cluster_y']).drop_duplicates(
+        subset=['cluster_x', 'cluster_y']).reset_index(drop=True)
+
+    result = []
+    for i, occurrence in enumerate(occurrences):
+        fitered = np.unique(np.array(occurrence), return_counts=True)
+        result.extend(fitered[1])
+
+    graph_df["occurrence"] = result
+
+    self_pointg_df = {"imagePath": [], "cluster_x": [], "cluster_y": [], "occurrence": []}
+    for cluster in df["cluster"].unique():
+        im_path = df[df["cluster"] == cluster]["imagePath"].values[0]
+        self_pointg_df["imagePath"].append(im_path)
+        self_pointg_df["cluster_x"].append(cluster)
+        self_pointg_df["cluster_y"].append(cluster)
+        self_pointg_df["occurrence"].append(1)
+
+    aux_df = pd.DataFrame(self_pointg_df)
+    graph_df = pd.concat([graph_df, aux_df])
+
+    all_clusters_list = list(range(len(clusters)))
+    for i in clusters:
+        group = graph_df.groupby(by="cluster_x").get_group(i)
+        images = group["imagePath"]
+        values = group.set_index("cluster_x").to_dict("list")
+        dict_results = \
+            graph_df.groupby(by="cluster_x").get_group(i)[["cluster_y", "occurrence"]].set_index("cluster_y").to_dict()[
+                "occurrence"]
+
+        for j in np.setdiff1d(np.array(all_clusters_list), np.array([*dict_results])):
+            dict_results[j] = 0
+
+        result_json[i] = {"values": {"image_list": images.to_list(), "clusters_info": dict_results}}
+
+    return result_json
+
+def generate_cluster_faces(df: pd.DataFrame, images_exit_path: str) -> dict:
+    clusters = np.sort(df["cluster"].unique())
+    cluster_groups = df.groupby("cluster")
+
+    result_json = {}
+    images_exit_path = f"{images_exit_path}/cluster_imgs"
+    if not os.path.exists(images_exit_path):
+        os.mkdir(images_exit_path)
+
+    for i in clusters:
+        group_encodings = cluster_groups.get_group(i)["encoding"]
+        distances = face_recognition.face_distance(group_encodings.to_list(), group_encodings.mean())
+        index = np.argmin(distances, axis=0)
+        line = cluster_groups.get_group(i).iloc[index]
+        result_json[i] = {"main_image": line["imagePath"], "main_image_loc": line["face_locations"]}
+        image = cv2.imread(line["imagePath"])
+        (top, right, bottom, left) = line["face_locations"]
+        face = image[top:bottom, left:right]
+        face = cv2.resize(face, (128, 128))
+        cv2.imwrite(f"{images_exit_path}/{i}.png", face)
+
+    return result_json
 
 
 def path_creation_verification(path: str):
@@ -30,6 +104,10 @@ def extract_face_features(images_path: list, images_exit_path: str, process_numb
 
     predictor = dlib.shape_predictor(shape_predictor_path)
     fa = FaceAligner(predictor, desiredFaceWidth=256)
+
+    images_exit_path = f"{images_exit_path}/encodings"
+    if not os.path.exists(images_exit_path):
+        os.mkdir(images_exit_path)
 
     to_back_up_qtd = int(len(images_path) + 1)
 

@@ -1,4 +1,3 @@
-import time
 from Utils import Cluster_Methods as cm
 from Utils import Create_Graph as cg
 from Utils import Extract_Features as ef
@@ -8,8 +7,7 @@ import concurrent.futures
 import pandas as pd
 import json
 import time
-
-
+import os
 
 configs_path = "user/configs/Configs.json"
 
@@ -17,7 +15,7 @@ with open(configs_path, 'r') as j:
     json_data = json.load(j)
     shape_predictor_path = json_data["shape_predictor_path"]
     files_path = json_data["dataset_path"]
-    files_exit_path = json_data["dataset_exit_encodings_path"]
+    files_exit_path = json_data["dataset_exit_path"]
     process_qtd = json_data["number_of_process"]
     back_up_percentage = json_data["back_up_percentage"]
 
@@ -26,6 +24,10 @@ initial_time = time.time()
 images_path = glob.glob(f"{files_path}/*")
 files_path_lists = np.array_split(images_path, process_qtd)
 result_df = pd.DataFrame()
+
+images_exit_path = f"{files_exit_path}/encodings"
+if not os.path.exists(images_exit_path):
+    os.mkdir(images_exit_path)
 
 with concurrent.futures.ProcessPoolExecutor() as executor:
     results = executor.map(ef.extract_face_features, files_path_lists, [files_exit_path] * process_qtd,
@@ -41,7 +43,6 @@ exit_var = time.time()
 print(f"extraction: {exit_var - initial_time}")
 
 initial_time = time.time()
-
 
 faces_data_graph = cg.generate_conections(result_df[["encoding"]], 0.5, True)
 exit_var = time.time()
@@ -60,8 +61,16 @@ exit_var = time.time()
 print(f"cluster: {exit_var - initial_time}")
 
 result_df.index.name = "id"
-result_df["labels"] = clustered_df["labels"]
-result_df.to_csv(f"{'/'.join(files_exit_path.split('/')[:-1])}/result.csv")
+result_df["cluster"] = clustered_df["labels"]
+del clustered_df
+
+result_df.to_csv(f"{files_exit_path}/result.csv")
+
+result_json = ef.generate_cluster_faces(result_df, files_exit_path)
+ef.save_result_json(result_df, result_json)
+
+# del result_df
+
 
 # for i in G.nodes():
 #     print(i, G.nodes()[i]["labels"])
