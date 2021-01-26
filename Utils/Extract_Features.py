@@ -45,7 +45,7 @@ def save_result_json(df: pd.DataFrame, result_json: dict):
     for i in clusters:
         group = graph_df.groupby(by="cluster_x").get_group(i)
         images = group["imagePath"]
-        values = group.set_index("cluster_x").to_dict("list")
+        # values = group.set_index("cluster_x").to_cdict("list")
         dict_results = \
             graph_df.groupby(by="cluster_x").get_group(i)[["cluster_y", "occurrence"]].set_index("cluster_y").to_dict()[
                 "occurrence"]
