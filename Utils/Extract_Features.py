@@ -57,6 +57,7 @@ def save_result_json(df: pd.DataFrame, result_json: dict):
 
     return result_json
 
+
 def generate_cluster_faces(df: pd.DataFrame, images_exit_path: str) -> dict:
     clusters = np.sort(df["cluster"].unique())
     cluster_groups = df.groupby("cluster")
@@ -172,10 +173,17 @@ def extract_face_features(images_path: list, images_exit_path: str, process_numb
     return data
 
 
-def save_pickle_at(data, path, process_number):
-    f = open(f"{path}/image_encondings_{process_number}.pickle", "wb")
+def save_pickle_at(data, path, process_text):
+    f = open(f"{path}/image_encondings_{process_text}.pickle", "wb")
     f.write(pickle.dumps(data))
     f.close()
+
+
+def load_pickle(path, process_text) -> pd.DataFrame:
+    return pickle.loads(open(f"{path}/image_encondings_{process_text}.pickle", "rb").read())
+
+    # f.write(pickle.dumps(G))
+    # f.close()
 
 
 if __name__ == '__main__':

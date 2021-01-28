@@ -12,7 +12,7 @@ import time
 import os
 
 
-def comecar_processamento(nome_do_caso):
+def comecar_processamento(nome_do_caso) -> pd.DataFrame:
     configs_path = "user/configs/Configs.json"
     generate_graph = False
     with open(configs_path, 'r') as j:
@@ -26,6 +26,9 @@ def comecar_processamento(nome_do_caso):
     dataset_output_path = f"{dataset_output_path}/{nome_do_caso}"
     if not os.path.exists(dataset_output_path):
         os.mkdir(dataset_output_path)
+
+    if not os.path.exists(f"{dataset_output_path}/image_encondings_{nome_do_caso}.pickle"):
+        return ef.load_pickle(dataset_output_path, nome_do_caso)
 
     initial_time = time.time()
 
@@ -76,8 +79,9 @@ def comecar_processamento(nome_do_caso):
         result_df = cm.simple_cluster(result_df)
 
     result_df.to_csv(f"{dataset_output_path}/result.csv")
-    ef.save_pickle_at(result_df, dataset_output_path, -1)
+    ef.save_pickle_at(result_df, dataset_output_path, nome_do_caso)
     result_json = ef.generate_cluster_faces(result_df, dataset_output_path)
+    return result_df
 
 if __name__ == '__main__':
     comecar_processamento("nome_do_caso")
