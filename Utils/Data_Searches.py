@@ -6,22 +6,22 @@ import os
 
 
 def show_cluster_random_faces(df_l: pd.DataFrame, cluster_number: int, faces_count: int = 16,
-                              figure_size: tuple = (96, 96)):
+                              figure_size: tuple = (16, 16), img_size: tuple = (96, 96)):
     idxs = df_l[df_l["cluster"] == cluster_number]
     idx = idxs.sample(min(faces_count, len(idxs)))
-    fig = plt.figure(figsize=(18, 18))
+    fig = plt.figure(figsize=figure_size)
 
     size = math.sqrt(faces_count)
     if size % 1 > 0:
         size = int(size) + 1
     size = int(size)
 
-    for i, line in idx.iterrows():
+    for i in range(len(idx)):
+        line = idx.iloc[i]
         image = cv2.imread(line["imagePath"])
         top, right, bottom, left = line["face_locations"]
         face = image[int(top):int(bottom), int(left):int(right)]
-        face = cv2.resize(face, figure_size)
-
+        face = cv2.resize(face, img_size)
         plt.subplot(size, size, i + 1)
         face = cv2.cvtColor(face, cv2.COLOR_BGR2RGB)
         plt.axis("off")
