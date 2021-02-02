@@ -27,7 +27,7 @@ def comecar_processamento(nome_do_caso) -> pd.DataFrame:
     if not os.path.exists(dataset_output_path):
         os.mkdir(dataset_output_path)
 
-    if not os.path.exists(f"{dataset_output_path}/image_encondings_{nome_do_caso}.pickle"):
+    if os.path.exists(f"{dataset_output_path}/image_encondings_{nome_do_caso}.pickle"):
         return ef.load_pickle(dataset_output_path, nome_do_caso)
 
     initial_time = time.time()
@@ -80,10 +80,38 @@ def comecar_processamento(nome_do_caso) -> pd.DataFrame:
 
     result_df.to_csv(f"{dataset_output_path}/result.csv")
     ef.save_pickle_at(result_df, dataset_output_path, nome_do_caso)
-    result_json = ef.generate_cluster_faces(result_df, dataset_output_path)
+    # result_json = ef.generate_cluster_faces(result_df, dataset_output_path)
     return result_df
 
+def generate_cluster_connections(df:pd.DataFrame):
+    connection_df = df.drop(columns = ["face_locations", "encoding"])
+    connection_df = connection_df.merge(connection_df, on = "imagePath")
+    connection_df = connection_df.query("cluster_x < cluster_y")
+    connection_df = connection_df.copy()
+    connection_df.drop_duplicates(inplace= True)
+    occurrences = connection_df.groupby(by="cluster_x").apply(lambda a:( a["cluster_y"].tolist()))
+    connection_df = connection_df.sort_values(by=['cluster_x', 'cluster_y']).drop_duplicates(subset=['cluster_x', 'cluster_y']).reset_index(drop=True)
+    result = []
+    for i,occurrence in enumerate(occurrences):
+        fitered = np.unique(np.array(occurrence), return_counts = True)
+        result.extend(fitered[1])
+
+    connection_df["occurrence"] = result
+
+    self_pointg_df = {"imagePath" : [], "cluster_x" : [],"cluster_y" : [], "occurrence" : []}
+    for cluster in df["cluster"].unique():
+        im_path = df[df["cluster"] == cluster]["imagePath"].values[0]
+        self_pointg_df["imagePath"].append(im_path)
+        self_pointg_df["cluster_x"].append(cluster)
+        self_pointg_df["cluster_y"].append(cluster)
+        self_pointg_df["occurrence"].append(1)
+
+    aux_df = pd.DataFrame(self_pointg_df)
+    connection_df = pd.concat([connection_df, aux_df])
+    return connection_df
+
 if __name__ == '__main__':
+    # print("sadsad")
     comecar_processamento("nome_do_caso")
 # result_json = ef.generate_cluster_faces(result_df, files_exit_path)
 # result_json = ef.save_result_json(result_df, result_json)

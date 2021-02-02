@@ -6,7 +6,7 @@ import pandas as pd
 import pickle
 import os
 import numpy as np
-
+# from tqdm import tqdm
 
 def save_result_json(df: pd.DataFrame, result_json: dict):
     clusters = np.sort(df["cluster"].unique())
