@@ -123,12 +123,14 @@ def extract_face_features(images_path: list, images_exit_path: str, process_numb
 
         boxes = face_recognition.face_locations(rgb, model=detection_method)
         if len(boxes) == 0:
+
             continue
 
         if normalize:
             encodings = []
 
             for i, box in enumerate(boxes):
+
                 top, right, bottom, left = box
                 rec = dlib.rectangle(top=top, right=right, bottom=bottom, left=left)
                 faceAligned = fa.align(image, gray, rec)

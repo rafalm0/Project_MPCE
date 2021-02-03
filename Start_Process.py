@@ -126,7 +126,7 @@ def generate_cluster_connections(df: pd.DataFrame):
 
 if __name__ == '__main__':
     # print("sadsad")
-    comecar_processamento("friends")
+    comecar_processamento("case_1")
 # result_json = ef.generate_cluster_faces(result_df, files_exit_path)
 # result_json = ef.save_result_json(result_df, result_json)
 
