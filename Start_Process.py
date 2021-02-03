@@ -31,7 +31,11 @@ def comecar_processamento(nome_do_caso) -> pd.DataFrame:
         return ef.load_pickle(dataset_output_path, nome_do_caso)
 
     initial_time = time.time()
-
+    files_path = f"{files_path}/{nome_do_caso}"
+    print(files_path)
+    if not os.path.exists(files_path):
+        print("Arquivos de entrada dos casos não existem")
+        return None
     images_path = glob.glob(f"{files_path}/*")
     files_path_lists = np.array_split(images_path, process_qtd)
     result_df = pd.DataFrame()
@@ -80,7 +84,7 @@ def comecar_processamento(nome_do_caso) -> pd.DataFrame:
 
     result_df.to_csv(f"{dataset_output_path}/result.csv")
     ef.save_pickle_at(result_df, dataset_output_path, nome_do_caso)
-    # result_json = ef.generate_cluster_faces(result_df, dataset_output_path)
+    ef.generate_cluster_faces(result_df, dataset_output_path)
     return result_df
 
 def generate_cluster_connections(df:pd.DataFrame):
@@ -112,7 +116,7 @@ def generate_cluster_connections(df:pd.DataFrame):
 
 if __name__ == '__main__':
     # print("sadsad")
-    comecar_processamento("nome_do_caso")
+    comecar_processamento("caso_1")
 # result_json = ef.generate_cluster_faces(result_df, files_exit_path)
 # result_json = ef.save_result_json(result_df, result_json)
 

@@ -116,7 +116,6 @@ def extract_face_features(images_path: list, images_exit_path: str, process_numb
     for (i, imagePath) in enumerate(images_path):
         if print_key:
             print(f"[INFO] processing {imagePath} , {i + 1}/{len(images_path)}")
-            print(imagePath)
 
         image = cv2.imread(imagePath)
         rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -191,5 +190,5 @@ if __name__ == '__main__':
     path = "/opt/project/dataset/train/bala"
     path_creation_verification(path)
     # print(os.listdir(path))
-    # df = extract_face_features(path)
+    df = extract_face_features(path)
     # print(df)

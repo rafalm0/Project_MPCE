@@ -29,13 +29,13 @@ def show_cluster_random_faces(df_l: pd.DataFrame, cluster_number: int, faces_cou
         plt.title(line["imagePath"].split("/")[-1][:-4])
 
 
-def show_clusters_main_face(nome_do_caso: str, tamanho_da_imagem: tuple = (8, 14)):
+def show_clusters_main_face(nome_do_caso : str, tamanho_da_imagem : tuple = (8,14)):
     path = f"user/dataset/exit_data/{nome_do_caso}/cluster_imgs"
     files = os.listdir(path)
-    fig = plt.figure(tamanho_da_imagem)
+    fig = plt.figure(figsize=tamanho_da_imagem)
     rows = int(0.3 * len(files)) + 1
     cols = len(files) - rows
-    for i, file in enumerate(files):
+    for i,file in enumerate(files):
         plt.subplot(rows, cols, i + 1)
         img = cv2.imread(f"{path}/{file}")
         # cv2_imshow(img)
