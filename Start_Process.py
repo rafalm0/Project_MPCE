@@ -2,6 +2,7 @@ from Utils import Cluster_Methods as cm
 from Utils import Create_Graph as cg
 from Utils import Extract_Features as ef
 from Utils.UtilMethods import NpEncoder
+from os import walk
 
 import glob
 import numpy as np
@@ -36,7 +37,12 @@ def comecar_processamento(nome_do_caso) -> pd.DataFrame:
     if not os.path.exists(files_path):
         print("Arquivos de entrada dos casos não existem")
         return None
-    images_path = glob.glob(f"{files_path}/*")
+
+    images_path = []
+    image_types = ["png", "jpg"]
+    for ext in image_types:
+        images_path.extend(list(glob.iglob(f'{files_path}/**/*.{ext}', recursive=True)))
+
     files_path_lists = np.array_split(images_path, process_qtd)
     result_df = pd.DataFrame()
 
@@ -46,7 +52,8 @@ def comecar_processamento(nome_do_caso) -> pd.DataFrame:
 
     with concurrent.futures.ProcessPoolExecutor() as executor:
         results = executor.map(ef.extract_face_features, files_path_lists, [dataset_output_path] * process_qtd,
-                               range(process_qtd), [shape_predictor_path] * process_qtd, [back_up_percentage] * process_qtd)
+                               range(process_qtd), [shape_predictor_path] * process_qtd,
+                               [back_up_percentage] * process_qtd)
 
         for result in results:
             result_df = pd.concat([result_df, result])
@@ -59,7 +66,7 @@ def comecar_processamento(nome_do_caso) -> pd.DataFrame:
 
     initial_time = time.time()
 
-    if(generate_graph):
+    if (generate_graph):
         faces_data_graph = cg.generate_conections(result_df[["encoding"]], 0.5, True)
         exit_var = time.time()
         print(f"conection: {exit_var - initial_time}")
@@ -87,22 +94,24 @@ def comecar_processamento(nome_do_caso) -> pd.DataFrame:
     ef.generate_cluster_faces(result_df, dataset_output_path)
     return result_df
 
-def generate_cluster_connections(df:pd.DataFrame):
-    connection_df = df.drop(columns = ["face_locations", "encoding"])
-    connection_df = connection_df.merge(connection_df, on = "imagePath")
+
+def generate_cluster_connections(df: pd.DataFrame):
+    connection_df = df.drop(columns=["face_locations", "encoding"])
+    connection_df = connection_df.merge(connection_df, on="imagePath")
     connection_df = connection_df.query("cluster_x < cluster_y")
     connection_df = connection_df.copy()
-    connection_df.drop_duplicates(inplace= True)
-    occurrences = connection_df.groupby(by="cluster_x").apply(lambda a:( a["cluster_y"].tolist()))
-    connection_df = connection_df.sort_values(by=['cluster_x', 'cluster_y']).drop_duplicates(subset=['cluster_x', 'cluster_y']).reset_index(drop=True)
+    connection_df.drop_duplicates(inplace=True)
+    occurrences = connection_df.groupby(by="cluster_x").apply(lambda a: (a["cluster_y"].tolist()))
+    connection_df = connection_df.sort_values(by=['cluster_x', 'cluster_y']).drop_duplicates(
+        subset=['cluster_x', 'cluster_y']).reset_index(drop=True)
     result = []
-    for i,occurrence in enumerate(occurrences):
-        fitered = np.unique(np.array(occurrence), return_counts = True)
+    for i, occurrence in enumerate(occurrences):
+        fitered = np.unique(np.array(occurrence), return_counts=True)
         result.extend(fitered[1])
 
     connection_df["occurrence"] = result
 
-    self_pointg_df = {"imagePath" : [], "cluster_x" : [],"cluster_y" : [], "occurrence" : []}
+    self_pointg_df = {"imagePath": [], "cluster_x": [], "cluster_y": [], "occurrence": []}
     for cluster in df["cluster"].unique():
         im_path = df[df["cluster"] == cluster]["imagePath"].values[0]
         self_pointg_df["imagePath"].append(im_path)
@@ -114,9 +123,10 @@ def generate_cluster_connections(df:pd.DataFrame):
     connection_df = pd.concat([connection_df, aux_df])
     return connection_df
 
+
 if __name__ == '__main__':
     # print("sadsad")
-    comecar_processamento("caso_1")
+    comecar_processamento("friends")
 # result_json = ef.generate_cluster_faces(result_df, files_exit_path)
 # result_json = ef.save_result_json(result_df, result_json)
 
