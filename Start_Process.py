@@ -12,9 +12,10 @@ import json
 import time
 import os
 
+configs_path = "user/configs/Configs.json"
+
 
 def comecar_processamento(nome_do_caso) -> pd.DataFrame:
-    configs_path = "user/configs/Configs.json"
     generate_graph = False
     with open(configs_path, 'r') as j:
         json_data = json.load(j)
@@ -23,6 +24,10 @@ def comecar_processamento(nome_do_caso) -> pd.DataFrame:
         back_up_percentage = json_data["back_up_percentage"]
         process_qtd = json_data["number_of_process"]
         files_path = json_data["dataset_path"]
+
+    dataset_output_path = f"{dataset_output_path}"
+    if not os.path.exists(dataset_output_path):
+        os.mkdir(dataset_output_path)
 
     dataset_output_path = f"{dataset_output_path}/{nome_do_caso}"
     if not os.path.exists(dataset_output_path):
@@ -38,8 +43,9 @@ def comecar_processamento(nome_do_caso) -> pd.DataFrame:
         print("Arquivos de entrada dos casos não existem")
         return None
 
+    import glob
     images_path = []
-    image_types = ["png", "jpg"]
+    image_types = ["mp4", "jpg"]
     for ext in image_types:
         images_path.extend(list(glob.iglob(f'{files_path}/**/*.{ext}', recursive=True)))
 
@@ -94,6 +100,11 @@ def comecar_processamento(nome_do_caso) -> pd.DataFrame:
     ef.generate_cluster_faces(result_df, dataset_output_path)
     return result_df
 
+def get_casos() -> list:
+    with open(configs_path, 'r') as j:
+        json_data = json.load(j)
+        dataset_output_path = json_data["dataset_path"]
+    return os.listdir(dataset_output_path)
 
 def generate_cluster_connections(df: pd.DataFrame):
     connection_df = df.drop(columns=["face_locations", "encoding"])

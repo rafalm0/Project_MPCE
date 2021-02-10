@@ -3,6 +3,7 @@ import pandas as pd
 import math
 import cv2
 import os
+import re
 
 
 def show_cluster_random_faces(df_l: pd.DataFrame, cluster_number: int, faces_count: int = 16,
@@ -29,13 +30,20 @@ def show_cluster_random_faces(df_l: pd.DataFrame, cluster_number: int, faces_cou
         plt.title(line["imagePath"].split("/")[-1][:-4])
 
 
-def show_clusters_main_face(nome_do_caso : str, tamanho_da_imagem : tuple = (8,14)):
+def show_clusters_main_face(nome_do_caso: str, tamanho_da_imagem: tuple = (8, 14), cols: int = 6,
+                            top_distance: float = 10):
     path = f"user/dataset/exit_data/{nome_do_caso}/cluster_imgs"
     files = os.listdir(path)
-    fig = plt.figure(figsize=tamanho_da_imagem)
-    rows = int(0.3 * len(files)) + 1
-    cols = len(files) - rows
-    for i,file in enumerate(files):
+    files.sort(key=lambda f: int(re.sub('\D', '', f)))
+
+    px = 1 / plt.rcParams['figure.dpi']
+
+    fig = plt.figure(figsize=(tamanho_da_imagem[0] * px, tamanho_da_imagem[1] * px))
+    plt.subplots_adjust(top=top_distance)
+
+    rows = len(files) - cols
+
+    for i, file in enumerate(files):
         plt.subplot(rows, cols, i + 1)
         img = cv2.imread(f"{path}/{file}")
         # cv2_imshow(img)
@@ -46,36 +54,47 @@ def show_clusters_main_face(nome_do_caso : str, tamanho_da_imagem : tuple = (8,1
     plt.show()
 
 
-def show_cluster_connections(cluster: int, nome_do_caso: str, conection_df: pd.DataFrame):
+def show_cluster_connections(cluster: int, nome_do_caso: str, conection_df: pd.DataFrame,
+                             tamanho_da_imagem: tuple = (8, 14), img_size: tuple = (96, 96), cols: int = 6,
+                             top_distance: float = 10):
     path = f"user/dataset/exit_data/{nome_do_caso}/cluster_imgs"
     files = os.listdir(path)
-    file = files.pop(cluster)
+    files.sort(key=lambda f: int(re.sub('\D', '', f)))
+
+    initial_file = files[cluster]
 
     fig = plt.figure(figsize=(2, 2))
     plt.subplot(1, 1, 1)
-    img = cv2.imread(f"{path}/{file}")
+    img = cv2.imread(f"{path}/{initial_file}")
     # cv2_imshow(img)
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     plt.axis("off")
     plt.imshow(img)
-    plt.title(f"cluster: {file[:-4]}")
+    plt.title(f"cluster: {initial_file[:-4]}")
     plt.show()
 
-    fig = plt.figure(figsize=(5, 5))
-    rows = int(0.3 * len(files)) + 1
-    cols = len(files) - rows
+    px = 1 / plt.rcParams['figure.dpi']
+
+    fig = plt.figure(figsize=(tamanho_da_imagem[0] * px, tamanho_da_imagem[1] * px))
+    plt.subplots_adjust(top=top_distance)
+
+    rows = len(files) - cols
+
     for i, file in enumerate(files):
+        if (file == initial_file):
+            continue
+
         plt.subplot(rows, cols, i + 1)
         img = cv2.imread(f"{path}/{file}")
+        img = cv2.resize(img, img_size)
         # cv2_imshow(img)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         plt.axis("off")
         plt.imshow(img)
 
-        if (i > cluster):
-            line = conection_df[(conection_df["cluster_x"] == cluster) & (conection_df["cluster_y"] == i)]
-        else:
-            line = conection_df[(conection_df["cluster_x"] == i) & (conection_df["cluster_y"] == cluster)]
+        line = conection_df[((conection_df["cluster_x"] == cluster) & (conection_df["cluster_y"] == i)) |
+
+                            ((conection_df["cluster_x"] == i) & (conection_df["cluster_y"] == cluster))]
 
         plt.title(f"cluster: {file[:-4]}\nconexão: {0 if len(line) == 0 else line.iloc[0]['occurrence']}")
     plt.show()
