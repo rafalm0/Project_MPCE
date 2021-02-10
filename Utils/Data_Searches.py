@@ -30,8 +30,8 @@ def show_cluster_random_faces(df_l: pd.DataFrame, cluster_number: int, faces_cou
         plt.title(line["imagePath"].split("/")[-1][:-4])
 
 
-def show_clusters_main_face(nome_do_caso: str, tamanho_da_imagem: tuple = (8, 14), cols: int = 6,
-                            top_distance: float = 10):
+def show_clusters_main_face(nome_do_caso: str, tamanho_da_imagem: tuple = (1920, 1080), cols: int = 6,
+                            top_distance: float = 1):
     path = f"user/dataset/exit_data/{nome_do_caso}/cluster_imgs"
     files = os.listdir(path)
     files.sort(key=lambda f: int(re.sub('\D', '', f)))
@@ -41,7 +41,7 @@ def show_clusters_main_face(nome_do_caso: str, tamanho_da_imagem: tuple = (8, 14
     fig = plt.figure(figsize=(tamanho_da_imagem[0] * px, tamanho_da_imagem[1] * px))
     plt.subplots_adjust(top=top_distance)
 
-    rows = len(files) - cols
+    rows = len(files) - cols + 1
 
     for i, file in enumerate(files):
         plt.subplot(rows, cols, i + 1)
@@ -55,8 +55,8 @@ def show_clusters_main_face(nome_do_caso: str, tamanho_da_imagem: tuple = (8, 14
 
 
 def show_cluster_connections(cluster: int, nome_do_caso: str, conection_df: pd.DataFrame,
-                             tamanho_da_imagem: tuple = (8, 14), img_size: tuple = (96, 96), cols: int = 6,
-                             top_distance: float = 10):
+                             tamanho_da_imagem: tuple = (1920, 1080), img_size: tuple = (96, 96), cols: int = 6,
+                             top_distance: float = 1):
     path = f"user/dataset/exit_data/{nome_do_caso}/cluster_imgs"
     files = os.listdir(path)
     files.sort(key=lambda f: int(re.sub('\D', '', f)))
@@ -78,7 +78,7 @@ def show_cluster_connections(cluster: int, nome_do_caso: str, conection_df: pd.D
     fig = plt.figure(figsize=(tamanho_da_imagem[0] * px, tamanho_da_imagem[1] * px))
     plt.subplots_adjust(top=top_distance)
 
-    rows = len(files) - cols
+    rows = len(files) - cols + 1
 
     for i, file in enumerate(files):
         if (file == initial_file):
