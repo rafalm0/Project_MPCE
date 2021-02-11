@@ -45,7 +45,7 @@ def comecar_processamento(nome_do_caso) -> pd.DataFrame:
 
     import glob
     images_path = []
-    image_types = ["mp4", "jpg"]
+    image_types = ["png", "jpg", "jpeg"]
     for ext in image_types:
         images_path.extend(list(glob.iglob(f'{files_path}/**/*.{ext}', recursive=True)))
 
