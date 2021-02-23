@@ -32,7 +32,7 @@ def show_cluster_random_faces(df_l: pd.DataFrame, cluster_number: int, faces_cou
 
 def show_clusters_main_face(nome_do_caso: str, tamanho_da_imagem: tuple = (1920, 1080), cols: int = 6,
                             top_distance: float = 1):
-    path = f"user/dataset/exit_data/{nome_do_caso}/cluster_imgs"
+    path = f"{nome_do_caso}/cluster_imgs"
     files = os.listdir(path)
     files.sort(key=lambda f: int(re.sub('\D', '', f)))
 
@@ -57,7 +57,7 @@ def show_clusters_main_face(nome_do_caso: str, tamanho_da_imagem: tuple = (1920,
 def show_cluster_connections(cluster: int, nome_do_caso: str, conection_df: pd.DataFrame,
                              tamanho_da_imagem: tuple = (1920, 1080), img_size: tuple = (96, 96), cols: int = 6,
                              top_distance: float = 1):
-    path = f"user/dataset/exit_data/{nome_do_caso}/cluster_imgs"
+    path = f"{nome_do_caso}/cluster_imgs"
     files = os.listdir(path)
     files.sort(key=lambda f: int(re.sub('\D', '', f)))
 
