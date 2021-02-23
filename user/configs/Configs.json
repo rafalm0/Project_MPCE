@@ -1,7 +1,7 @@
 {
   "dataset_path" : "user/dataset/input_data",
-  "dataset_exit_encodings_path" : "user/dataset/exit_data/encodings",
-  "number_of_process" : 2,
+  "dataset_output_path" : "user/dataset/exit_data",
+  "number_of_process" : 4,
   "back_up_percentage" : 0.1,
   "shape_predictor_path" : "Utils/pretrained_models/shape_predictor_68_face_landmarks.dat"
 }
