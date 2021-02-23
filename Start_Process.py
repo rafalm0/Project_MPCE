@@ -34,7 +34,7 @@ def comecar_processamento(nome_do_caso) -> pd.DataFrame:
         os.mkdir(dataset_output_path)
 
     if os.path.exists(f"{dataset_output_path}/image_encondings_{nome_do_caso}.pickle"):
-        return ef.load_pickle(dataset_output_path, nome_do_caso)
+        return ef.load_pickle(f"{dataset_output_path}/image_encondings_{nome_do_caso}.pickle")
 
     initial_time = time.time()
     files_path = f"{files_path}/{nome_do_caso}"
@@ -96,15 +96,17 @@ def comecar_processamento(nome_do_caso) -> pd.DataFrame:
         result_df = cm.simple_cluster(result_df)
 
     result_df.to_csv(f"{dataset_output_path}/result.csv")
-    ef.save_pickle_at(result_df, dataset_output_path, nome_do_caso)
+    ef.save_pickle_at(result_df, f"{dataset_output_path}/{nome_do_caso}.pickle")
     ef.generate_cluster_faces(result_df, dataset_output_path)
     return result_df
+
 
 def get_casos() -> list:
     with open(configs_path, 'r') as j:
         json_data = json.load(j)
         dataset_output_path = json_data["dataset_path"]
     return os.listdir(dataset_output_path)
+
 
 def generate_cluster_connections(df: pd.DataFrame):
     connection_df = df.drop(columns=["face_locations", "encoding"])
@@ -137,7 +139,7 @@ def generate_cluster_connections(df: pd.DataFrame):
 
 if __name__ == '__main__':
     # print("sadsad")
-    comecar_processamento("case_1")
+    comecar_processamento("friends")
 # result_json = ef.generate_cluster_faces(result_df, files_exit_path)
 # result_json = ef.save_result_json(result_df, result_json)
 

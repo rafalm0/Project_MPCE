@@ -6,6 +6,8 @@ import pandas as pd
 import pickle
 import os
 import numpy as np
+
+
 # from tqdm import tqdm
 
 def save_result_json(df: pd.DataFrame, result_json: dict):
@@ -123,14 +125,12 @@ def extract_face_features(images_path: list, images_exit_path: str, process_numb
 
         boxes = face_recognition.face_locations(rgb, model=detection_method)
         if len(boxes) == 0:
-
             continue
 
         if normalize:
             encodings = []
 
             for i, box in enumerate(boxes):
-
                 top, right, bottom, left = box
                 rec = dlib.rectangle(top=top, right=right, bottom=bottom, left=left)
                 faceAligned = fa.align(image, gray, rec)
@@ -156,7 +156,7 @@ def extract_face_features(images_path: list, images_exit_path: str, process_numb
                 aux_df.to_csv(f"{images_exit_path}/image_encondings_{process_number}.csv")
                 del aux_df
             if save_pickle:
-                save_pickle_at(data, images_exit_path, process_number)
+                save_pickle_at(data, f"{images_exit_path}/image_encondings_{process_number}.pickle")
 
     data = pd.DataFrame(data)
     data.index += 1
@@ -167,21 +167,21 @@ def extract_face_features(images_path: list, images_exit_path: str, process_numb
     if save_csv:
         data.to_csv(f"{images_exit_path}/image_encondings_{process_number}.csv")
     if save_pickle:
-        save_pickle_at(data, images_exit_path, process_number)
+        save_pickle_at(data, f"{images_exit_path}/image_encondings_{process_number}.pickle")
 
     print(f"Process Number {process_number} has ended")
 
     return data
 
 
-def save_pickle_at(data, path, process_text):
-    f = open(f"{path}/image_encondings_{process_text}.pickle", "wb")
+def save_pickle_at(data, path):
+    f = open(path, "wb")
     f.write(pickle.dumps(data))
     f.close()
 
 
-def load_pickle(path, process_text) -> pd.DataFrame:
-    return pickle.loads(open(f"{path}/image_encondings_{process_text}.pickle", "rb").read())
+def load_pickle(path) -> pd.DataFrame:
+    return pickle.loads(open(path, "rb").read())
 
     # f.write(pickle.dumps(G))
     # f.close()
