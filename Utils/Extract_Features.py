@@ -151,7 +151,7 @@ def extract_face_features(images_path: list,
             data["face_locations"].append(box)
             data["encoding"].append(enc)
 
-        if ConfigJsonValues.back_up_percentage > 0 and i % to_back_up_qtd == 0 and  backup_exit_path != "":
+        if ConfigJsonValues.back_up_percentage > 0 and i % to_back_up_qtd == 0 and backup_exit_path != "":
 
             if save_csv:
                 aux_df = pd.DataFrame(data)
@@ -163,13 +163,14 @@ def extract_face_features(images_path: list,
     data = pd.DataFrame(data)
     data.index += 1
 
-    while not os.path.exists(backup_exit_path):
-        path_creation_verification(backup_exit_path)
+    if backup_exit_path != "":
+        while not os.path.exists(backup_exit_path):
+            path_creation_verification(backup_exit_path)
 
-    if save_csv:
-        data.to_csv(f"{backup_exit_path}/image_encondings_{process_number}.csv")
-    if save_pickle:
-        save_pickle_at(data, f"{backup_exit_path}/image_encondings_{process_number}.pickle")
+        if save_csv:
+            data.to_csv(f"{backup_exit_path}/image_encondings_{process_number}.csv")
+        if save_pickle:
+            save_pickle_at(data, f"{backup_exit_path}/image_encondings_{process_number}.pickle")
 
     print(f"Process Number {process_number} has ended")
 
@@ -190,9 +191,10 @@ def load_pickle(path) -> pd.DataFrame:
 
 
 if __name__ == '__main__':
-    # print(os.path.abspath(__file__))
-    path = "/opt/project/dataset/train/bala"
-    path_creation_verification(path)
+    print(os.path.abspath(__file__))
+    # path = "/opt/project/dataset/train/bala"
+    # path_creation_verification(path)
     # print(os.listdir(path))
-    df = extract_face_features(path)
+    df = extract_face_features(["/opt/project/user/image1.jpg"])
+    df
     # print(df)
