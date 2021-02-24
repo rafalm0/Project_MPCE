@@ -94,7 +94,7 @@ def comecar_processamento(nome_do_caso) -> pd.DataFrame:
 
 
 def get_casos() -> list:
-    return os.listdir(ConfigJsonValues.dataset_output_path)
+    return os.listdir(ConfigJsonValues.files_path)
 
 
 def generate_cluster_connections(df: pd.DataFrame):
