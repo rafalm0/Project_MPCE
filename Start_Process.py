@@ -11,21 +11,13 @@ import pandas as pd
 import json
 import time
 import os
-
-configs_path = "user/configs/Configs.json"
+from Utils.UtilMethods import ConfigJsonValues
 
 
 def comecar_processamento(nome_do_caso) -> pd.DataFrame:
     generate_graph = False
-    with open(configs_path, 'r') as j:
-        json_data = json.load(j)
-        shape_predictor_path = json_data["shape_predictor_path"]
-        dataset_output_path = json_data["dataset_output_path"]
-        back_up_percentage = json_data["back_up_percentage"]
-        process_qtd = json_data["number_of_process"]
-        files_path = json_data["dataset_path"]
 
-    dataset_output_path = f"{dataset_output_path}"
+    dataset_output_path = f"{ConfigJsonValues.dataset_output_path}"
     if not os.path.exists(dataset_output_path):
         os.mkdir(dataset_output_path)
 
@@ -37,7 +29,7 @@ def comecar_processamento(nome_do_caso) -> pd.DataFrame:
         return ef.load_pickle(f"{dataset_output_path}/image_encondings_{nome_do_caso}.pickle")
 
     initial_time = time.time()
-    files_path = f"{files_path}/{nome_do_caso}"
+    files_path = f"{ConfigJsonValues.files_path}/{nome_do_caso}"
     print(files_path)
     if not os.path.exists(files_path):
         print("Arquivos de entrada dos casos não existem")
@@ -49,7 +41,7 @@ def comecar_processamento(nome_do_caso) -> pd.DataFrame:
     for ext in image_types:
         images_path.extend(list(glob.iglob(f'{files_path}/**/*.{ext}', recursive=True)))
 
-    files_path_lists = np.array_split(images_path, process_qtd)
+    files_path_lists = np.array_split(images_path, ConfigJsonValues.process_qtd)
     result_df = pd.DataFrame()
 
     images_exit_path = f"{dataset_output_path}/encodings"
@@ -57,9 +49,9 @@ def comecar_processamento(nome_do_caso) -> pd.DataFrame:
         os.mkdir(images_exit_path)
 
     with concurrent.futures.ProcessPoolExecutor() as executor:
-        results = executor.map(ef.extract_face_features, files_path_lists, [dataset_output_path] * process_qtd,
-                               range(process_qtd), [shape_predictor_path] * process_qtd,
-                               [back_up_percentage] * process_qtd)
+        results = executor.map(ef.extract_face_features, files_path_lists,
+                               [dataset_output_path] * ConfigJsonValues.process_qtd,
+                               range(ConfigJsonValues.process_qtd))
 
         for result in results:
             result_df = pd.concat([result_df, result])
@@ -102,10 +94,7 @@ def comecar_processamento(nome_do_caso) -> pd.DataFrame:
 
 
 def get_casos() -> list:
-    with open(configs_path, 'r') as j:
-        json_data = json.load(j)
-        dataset_output_path = json_data["dataset_path"]
-    return os.listdir(dataset_output_path)
+    return os.listdir(ConfigJsonValues.dataset_output_path)
 
 
 def generate_cluster_connections(df: pd.DataFrame):

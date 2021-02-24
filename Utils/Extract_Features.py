@@ -6,6 +6,7 @@ import pandas as pd
 import pickle
 import os
 import numpy as np
+from Utils.UtilMethods import ConfigJsonValues
 
 
 # from tqdm import tqdm
@@ -97,20 +98,21 @@ def path_creation_verification(path: str):
             os.mkdir(full_path)
 
 
-def extract_face_features(images_path: list, images_exit_path: str, process_number: str,
-                          shape_predictor_path: str, back_up_percentage: float,
+def extract_face_features(images_path: list,
+                          backup_exit_path: str = None, process_number: str = "0",
                           normalize: bool = True, print_key: bool = True, save_pickle: bool = True,
                           save_csv: bool = True,
                           detection_method: str = "cnn"
                           ) -> pd.DataFrame:
     print(f"Process Number {process_number} was started")
 
-    predictor = dlib.shape_predictor(shape_predictor_path)
+    predictor = dlib.shape_predictor(ConfigJsonValues.shape_predictor_path)
     fa = FaceAligner(predictor, desiredFaceWidth=256)
 
-    images_exit_path = f"{images_exit_path}/encodings"
-    if not os.path.exists(images_exit_path):
-        os.mkdir(images_exit_path)
+    if backup_exit_path:
+        backup_exit_path = f"{backup_exit_path}/encodings"
+        if not os.path.exists(backup_exit_path):
+            os.mkdir(backup_exit_path)
 
     to_back_up_qtd = int(len(images_path) + 1)
 
@@ -149,25 +151,25 @@ def extract_face_features(images_path: list, images_exit_path: str, process_numb
             data["face_locations"].append(box)
             data["encoding"].append(enc)
 
-        if back_up_percentage > 0 and i % to_back_up_qtd == 0:
+        if ConfigJsonValues.back_up_percentage > 0 and i % to_back_up_qtd == 0 and backup_exit_path:
 
             if save_csv:
                 aux_df = pd.DataFrame(data)
-                aux_df.to_csv(f"{images_exit_path}/image_encondings_{process_number}.csv")
+                aux_df.to_csv(f"{backup_exit_path}/image_encondings_{process_number}.csv")
                 del aux_df
             if save_pickle:
-                save_pickle_at(data, f"{images_exit_path}/image_encondings_{process_number}.pickle")
+                save_pickle_at(data, f"{backup_exit_path}/image_encondings_{process_number}.pickle")
 
     data = pd.DataFrame(data)
     data.index += 1
 
-    while not os.path.exists(images_exit_path):
-        path_creation_verification(images_exit_path)
+    while not os.path.exists(backup_exit_path):
+        path_creation_verification(backup_exit_path)
 
     if save_csv:
-        data.to_csv(f"{images_exit_path}/image_encondings_{process_number}.csv")
+        data.to_csv(f"{backup_exit_path}/image_encondings_{process_number}.csv")
     if save_pickle:
-        save_pickle_at(data, f"{images_exit_path}/image_encondings_{process_number}.pickle")
+        save_pickle_at(data, f"{backup_exit_path}/image_encondings_{process_number}.pickle")
 
     print(f"Process Number {process_number} has ended")
 
