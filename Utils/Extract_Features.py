@@ -99,7 +99,7 @@ def path_creation_verification(path: str):
 
 
 def extract_face_features(images_path: list,
-                          backup_exit_path: str = None, process_number: str = "0",
+                          backup_exit_path: str = "", process_number: str = "0",
                           normalize: bool = True, print_key: bool = True, save_pickle: bool = True,
                           save_csv: bool = True,
                           detection_method: str = "cnn"
@@ -109,7 +109,7 @@ def extract_face_features(images_path: list,
     predictor = dlib.shape_predictor(ConfigJsonValues.shape_predictor_path)
     fa = FaceAligner(predictor, desiredFaceWidth=256)
 
-    if backup_exit_path:
+    if backup_exit_path != "":
         backup_exit_path = f"{backup_exit_path}/encodings"
         if not os.path.exists(backup_exit_path):
             os.mkdir(backup_exit_path)
@@ -151,7 +151,7 @@ def extract_face_features(images_path: list,
             data["face_locations"].append(box)
             data["encoding"].append(enc)
 
-        if ConfigJsonValues.back_up_percentage > 0 and i % to_back_up_qtd == 0 and backup_exit_path:
+        if ConfigJsonValues.back_up_percentage > 0 and i % to_back_up_qtd == 0 and  backup_exit_path != "":
 
             if save_csv:
                 aux_df = pd.DataFrame(data)
